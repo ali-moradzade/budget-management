@@ -1,0 +1,41 @@
+@startuml
+title ICFG - createExpense()
+
+start
+
+partition "Controller" {
+    :POST /expenses/{userId};
+    :ExpenseController.createExpense();
+    :request.validate();
+}
+
+partition "Service Layer" {
+    :ExpenseService.createExpense();
+
+    :ValidationService.getUserIfExists(userId);
+    :ValidationService.getCategoryIfExists(userId, category);
+
+    if (participants != null) then (yes)
+        while (each participantId)
+            :ValidationService.getFriendIfExists();
+        endwhile
+    endif
+
+    :create Expense;
+    :expenseRepository.save();
+}
+
+partition "Business Logic" {
+    if (friends not empty) then (yes)
+        :calculate participantsCount;
+        :calculate shareAmount;
+
+        while (each friend)
+            :create ExpenseParticipant;
+            :expenseParticipantRepository.save();
+        endwhile
+    endif
+}
+
+stop
+@enduml

@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.invoke
+
 plugins {
     id("java")
     id("org.springframework.boot") version "3.3.0"
