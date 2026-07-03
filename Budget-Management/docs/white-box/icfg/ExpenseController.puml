@@ -1,0 +1,20 @@
+@startuml
+title ExpenseController ICFG
+
+start
+
+:POST /expenses/{userId};
+:ExpenseController.createExpense(userId, request);
+
+:request.validate();
+
+if (request valid?) then (yes)
+  :call ExpenseService.createExpense();
+else (no)
+  :throw validation exception;
+endif
+
+:return HTTP 201 CREATED;
+
+stop
+@enduml
