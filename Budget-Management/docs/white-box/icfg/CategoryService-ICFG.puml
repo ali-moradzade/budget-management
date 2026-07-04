@@ -1,0 +1,37 @@
+@startuml CategoryService-ICFG
+
+start
+
+:call createCategory(userId, categoryName);
+
+:validationService.getUserIfExists;
+
+:validationService.checkCategoryNameDuplication;
+
+if (duplicate category?) then (yes)
+    :throw ResourceAlreadyExistsException;
+    stop
+endif
+
+:create Category entity;
+:categoryRepository.save;
+
+stop
+
+---
+
+start
+
+:call getUserCategories(userId);
+
+:validationService.getUserIfExists;
+
+:categoryRepository.findByUserId;
+
+:map Category -> name;
+
+:return list;
+
+stop
+
+@enduml

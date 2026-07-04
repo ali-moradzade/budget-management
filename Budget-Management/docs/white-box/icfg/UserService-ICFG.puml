@@ -1,0 +1,21 @@
+@startuml UserService-ICFG
+
+start
+
+:call createUser(username);
+
+:call validationService.checkUserNameDuplication;
+
+if (username already exists?) then (yes)
+    :throw ResourceAlreadyExistsException;
+    stop
+endif
+
+:create new User(username);
+:save userRepository.save;
+
+:return userId;
+
+stop
+
+@enduml

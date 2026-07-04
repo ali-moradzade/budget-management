@@ -1,0 +1,87 @@
+@startuml ValidationService-ICFG
+
+start
+
+:call getCategoryIfExists(userId, categoryName);
+
+if (categoryName != null?) then (yes)
+    :query categoryRepository.findCategoryByUserIdAndName;
+    if (category exists?) then (yes)
+        :return Category;
+    else (no)
+        :throw ResourceNotFoundException;
+    endif
+else (no)
+    :return null;
+endif
+
+stop
+
+---
+
+start
+
+:call getExpenseIfExists(userId, expenseId);
+:query expenseRepository.findExpenseByUserIdAndId;
+
+if (expense exists?) then (yes)
+    :return Expense;
+else (no)
+    :throw ResourceNotFoundException;
+endif
+
+stop
+
+---
+
+start
+
+:call getExpenseParticipantIfExists(userId, id);
+:query expenseParticipantRepository.findById;
+
+if (participant exists?) then (yes)
+    :query expenseRepository.findExpenseByUserIdAndId (ownership check);
+
+    if (expense belongs to user?) then (yes)
+        :return ExpenseParticipant;
+    else (no)
+        :throw ResourceNotFoundException;
+    endif
+
+else (no)
+    :throw ResourceNotFoundException;
+endif
+
+stop
+
+---
+
+start
+
+:call getFriendIfExists(userId, friendId);
+:query friendRepository.findFriendByUserIdAndId;
+
+if (friend exists?) then (yes)
+    :return Friend;
+else (no)
+    :throw ResourceNotFoundException;
+endif
+
+stop
+
+---
+
+start
+
+:call getUserIfExists(userId);
+:query userRepository.findById;
+
+if (user exists?) then (yes)
+    :return User;
+else (no)
+    :throw ResourceNotFoundException;
+endif
+
+stop
+
+@enduml

@@ -1,0 +1,72 @@
+@startuml ExpenseParticipantService-ICFG
+
+start
+
+:call getExpenseParticipants;
+:validationService.getUserIfExists;
+:validationService.getExpenseIfExists;
+:expenseParticipantRepository.findByExpenseId;
+:map results;
+
+stop
+
+---
+
+start
+
+:call getAllDebts;
+
+:validationService.getUserIfExists;
+:friends = getAllFriends;
+
+:i = 0;
+
+while (i < size(friends)) is (true)
+    :friendId = friends[i];
+    :getDebt(userId, friendId);
+    :i = i + 1;
+endwhile (false)
+
+:return DebtResponse list;
+
+stop
+
+---
+
+start
+
+:call getDebt;
+
+:validationService.getUserIfExists;
+:validationService.getFriendIfExists;
+:expenseParticipantRepository.findByFriendIdAndPaidFalse;
+:sum shareAmount;
+:return DebtResponse;
+
+stop
+
+---
+
+start
+
+:call markAsPaid;
+:validationService.getUserIfExists;
+:validationService.getExpenseParticipantIfExists;
+:set paid=true;
+:save;
+
+stop
+
+---
+
+start
+
+:call markAsUnpaid;
+:validationService.getUserIfExists;
+:validationService.getExpenseParticipantIfExists;
+:set paid=false;
+:save;
+
+stop
+
+@enduml

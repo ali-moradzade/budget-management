@@ -1,0 +1,37 @@
+@startuml FriendService-ICFG
+
+start
+
+:call addFriend(userId, request);
+
+:validationService.getUserIfExists;
+
+:validationService.checkFriendNameDuplication;
+
+if (duplicate friend?) then (yes)
+    :throw ResourceAlreadyExistsException;
+    stop
+endif
+
+:create Friend entity;
+:friendRepository.save;
+
+stop
+
+---
+
+start
+
+:call getUserFriends(userId);
+
+:validationService.getUserIfExists;
+
+:friendRepository.findByUserId;
+
+:map Friend -> FriendResponse;
+
+:return list;
+
+stop
+
+@enduml

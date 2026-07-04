@@ -1,0 +1,72 @@
+@startuml ExpenseService-ICFG
+
+start
+
+:call createExpense(userId, request);
+
+:validationService.getUserIfExists;
+:validationService.getCategoryIfExists;
+
+:participants = [];
+
+if (request.participants != null?) then (yes)
+
+    :i = 0;
+
+    while (i < size(participants)) is (true)
+        :participantId = participants[i];
+        :validationService.getFriendIfExists;
+        :add Friend to list;
+        :i = i + 1;
+    endwhile (false)
+
+endif
+
+:create Expense;
+:expenseRepository.save;
+
+if (participants not empty?) then (yes)
+
+    :participantsCount = friends + 1;
+    :shareAmount = amount / participantsCount;
+
+    :j = 0;
+
+    while (j < size(friends)) is (true)
+        :friend = friends[j];
+        :create ExpenseParticipant;
+        :expenseParticipantRepository.save;
+        :j = j + 1;
+    endwhile (false)
+
+endif
+
+stop
+
+---
+
+start
+
+:call getUserExpenses;
+
+:validationService.getUserIfExists;
+:expenseRepository.findByUserId;
+
+:map Expense -> ExpenseResponse;
+
+stop
+
+---
+
+start
+
+:call getExpense;
+
+:validationService.getUserIfExists;
+:validationService.getExpenseIfExists;
+
+:map Expense -> ExpenseResponse;
+
+stop
+
+@enduml
