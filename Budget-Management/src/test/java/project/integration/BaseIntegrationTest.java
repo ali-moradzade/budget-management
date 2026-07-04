@@ -1,0 +1,27 @@
+package project.integration;
+
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.junit.jupiter.Container;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Testcontainers
+public abstract class BaseIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:16");
+
+    @DynamicPropertySource
+    static void configure(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+}
