@@ -15,6 +15,11 @@ export const options = {
     },
 };
 
+// export const options = {
+//     vus: 1,
+//     iterations: 1,
+// };
+
 const BASE_URL = "http://localhost:8080";
 
 export default function () {
@@ -43,17 +48,18 @@ export default function () {
 
     // 2. CREATE CATEGORY (ONLY IF USER EXISTS)
     let catRes = http.post(
-        `${BASE_URL}/categories/${userId}`,
-        null,
-        {
-            params: {
-                categoryName: "food"
-            }
-        }
+        `${BASE_URL}/categories/${userId}?categoryName=food`,
+        null
     );
 
     check(catRes, {
-        "category created": (r) => r.status === 201,
+        "category created": (r) => {
+            if (r.status !== 201) {
+                console.log("Category status:", r.status);
+                console.log("Category body:", r.body);
+            }
+            return r.status === 201;
+        },
     });
 
     if (catRes.status !== 201) return;
