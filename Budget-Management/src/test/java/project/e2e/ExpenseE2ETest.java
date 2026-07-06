@@ -10,6 +10,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ExpenseE2ETest extends BaseE2ETest {
 
+    // -------------------------
+    // helpers
+    // -------------------------
+    private String createUser(String username) throws Exception {
+        return mockMvc.perform(post("/users")
+                        .param("username", username)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
+
+    private void createCategory(String userId, String name) throws Exception {
+        mockMvc.perform(post("/categories/{userId}", userId)
+                        .param("categoryName", name))
+                .andExpect(status().isCreated());
+    }
+
     @Test
     void createExpense_shouldPersist() throws Exception {
 
@@ -52,5 +70,66 @@ public class ExpenseE2ETest extends BaseE2ETest {
         mockMvc.perform(get("/expenses/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void should_return_400_when_username_blank() throws Exception {
+        mockMvc.perform(post("/users")
+                        .param("username", " "))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_category_name_blank() throws Exception {
+
+        String userId = createUser("ali");
+
+        mockMvc.perform(post("/categories/{userId}", userId)
+                        .param("categoryName", " "))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_expense_amount_invalid() throws Exception {
+
+        String userId = createUser("ali");
+        createCategory(userId, "food");
+
+        mockMvc.perform(post("/expenses/{userId}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "category": "food",
+                                  "amount": 0,
+                                  "description": "invalid",
+                                  "friendIds": []
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_404_when_user_not_found() throws Exception {
+
+        mockMvc.perform(get("/expenses/{userId}", 999999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void should_return_404_when_category_not_found() throws Exception {
+
+        String userId = createUser("ali");
+
+        mockMvc.perform(post("/expenses/{userId}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "category": "unknown",
+                                  "amount": 100,
+                                  "description": "test",
+                                  "friendIds": []
+                                }
+                                """))
+                .andExpect(status().isNotFound());
     }
 }
