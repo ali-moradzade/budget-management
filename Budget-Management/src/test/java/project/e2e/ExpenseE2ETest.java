@@ -61,7 +61,7 @@ public class ExpenseE2ETest extends BaseE2ETest {
                                   "category": "food",
                                   "amount": 100.0,
                                   "description": "dinner",
-                                  "friendIds": []
+                                  "participants": []
                                 }
                                 """))
                 .andExpect(status().isCreated());
@@ -127,9 +127,43 @@ public class ExpenseE2ETest extends BaseE2ETest {
                                   "category": "unknown",
                                   "amount": 100,
                                   "description": "test",
-                                  "friendIds": []
+                                  "participants": []
                                 }
                                 """))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void get_expenses_should_return_empty_list_when_none_exist() throws Exception {
+
+        String userId = mockMvc.perform(post("/users")
+                        .param("username", "ali2")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andReturn().getResponse().getContentAsString();
+
+        mockMvc.perform(get("/expenses/{userId}", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void create_expense_should_fail_when_amount_is_null() throws Exception {
+
+        String userId = mockMvc.perform(post("/users")
+                        .param("username", "ali3")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andReturn().getResponse().getContentAsString();
+
+        mockMvc.perform(post("/expenses/{userId}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "category": "food",
+                          "amount": null,
+                          "description": "test",
+                          "friendIds": []
+                        }
+                    """))
+                .andExpect(status().isBadRequest());
     }
 }

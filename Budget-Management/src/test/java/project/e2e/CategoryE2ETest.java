@@ -29,4 +29,17 @@ public class CategoryE2ETest extends BaseE2ETest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0]").value("food"));
     }
+
+    @Test
+    void create_category_should_fail_when_name_is_blank() throws Exception {
+
+        String userId = mockMvc.perform(post("/users")
+                        .param("username", "ali4")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andReturn().getResponse().getContentAsString();
+
+        mockMvc.perform(post("/categories/{userId}", userId)
+                        .param("categoryName", " "))
+                .andExpect(status().isBadRequest());
+    }
 }

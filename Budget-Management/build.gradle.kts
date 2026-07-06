@@ -6,6 +6,7 @@ plugins {
     jacoco
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
+    id("info.solidsoft.pitest") version "1.15.0"
 }
 
 group = "project"
@@ -45,6 +46,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.rest-assured:rest-assured:5.5.0")
+
+    testImplementation("org.pitest:pitest-junit5-plugin:1.2.1")
 }
 
 tasks.withType<Test> {
@@ -88,4 +91,17 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+}
+
+pitest {
+    targetClasses.set(listOf("project.*"))
+    targetTests.set(listOf("project.*"))
+
+    junit5PluginVersion.set("1.2.1")
+
+    threads.set(4)
+
+    outputFormats.set(listOf("HTML"))
+
+    timestampedReports.set(false)
 }

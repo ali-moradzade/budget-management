@@ -22,9 +22,11 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Long createUser(@RequestParam String username) {
-        if (username.isBlank()) {
+
+        if (username == null || username.isBlank()) {
             throw new BadRequestException("Username can not be empty");
         }
+
         return userService.createUser(username);
     }
 }
